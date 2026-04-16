@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/api-vehicle/:rc",
+      "destination": "https://vehicle-api-info-suruzxxr.vercel.app/vehicle-info?rc=:rc"
+    },
+    {
+      "source": "/api-ff/:uid",
+      "destination": "https://anku-ffapi-inky.vercel.app/ff?uid=:uid"
+    },
+    {
+      "source": "/api-imei/:imei",
+      "destination": "https://ng-imei-info.vercel.app/?imei_num=:imei"
+    }
+  ]
+}
