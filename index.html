@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>V-INTEL · Vehicle · FF · IMEI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --main-color: #00eaff;
+            --bg-color: #050505;
+            --card-bg: rgba(15, 15, 15, 0.98);
+            --neon-green: #39ff14;
+            --warning-color: #ffcc00;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #ffffff;
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding: 20px 0 40px 0;
+        }
+
+        #matrix {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            width: 100%;
+            height: 100%;
+            opacity: 0.15;
+            pointer-events: none;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 560px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            z-index: 5;
+        }
+
+        .brand-header {
+            text-align: center;
+            padding: 10px 0 5px;
+            border-bottom: 1px solid #222;
+            width: 90%;
+        }
+        .brand-header h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--main-color);
+            font-size: 1.8rem;
+            letter-spacing: 2px;
+            text-shadow: 0 0 8px rgba(0,234,255,0.5);
+            margin-bottom: 5px;
+        }
+        .brand-header p {
+            color: #aaa;
+            font-size: 0.7rem;
+            word-spacing: 2px;
+        }
+
+        .card-modern {
+            background: var(--card-bg);
+            border: 1px solid #2a2a2a;
+            border-radius: 24px;
+            padding: 22px 18px;
+            width: 95%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+            backdrop-filter: blur(2px);
+        }
+
+        .card-title {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--main-color);
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid #2a2a2a;
+            padding-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px 14px;
+            background: #0b0b0b;
+            border: 1px solid #333;
+            border-radius: 18px;
+            color: #0ff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            outline: none;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+        }
+
+        input:focus {
+            border-color: var(--main-color);
+            box-shadow: 0 0 12px rgba(0,234,255,0.3);
+        }
+
+        button {
+            background: var(--main-color);
+            border: none;
+            border-radius: 40px;
+            padding: 15px 20px;
+            font-weight: bold;
+            font-size: 1rem;
+            text-transform: uppercase;
+            color: #000;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+
+        button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 15px var(--main-color);
+        }
+
+        .btn-imei { background: #2ed573; }
+        .btn-dev { background: #0088cc; color: white; margin-top: 5px; }
+
+        .result-block {
+            margin-top: 20px;
+            border-top: 1px dashed #333;
+            padding-top: 15px;
+        }
+
+        .vehicle-card {
+            border-left: 4px solid var(--main-color);
+            padding-left: 10px;
+            margin-bottom: 16px;
+        }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #1f1f1f;
+            font-size: 0.9rem;
+        }
+
+        .label { color: #aaa; }
+        .val { color: #fff; font-weight: bold; text-align: right; }
+
+        .json-box {
+            background: #0c0c0c;
+            border-radius: 12px;
+            padding: 12px;
+            color: #0fa;
+            font-size: 0.75rem;
+            white-space: pre-wrap;
+            border: 1px solid #2a5f6b;
+            margin-bottom: 15px;
+            overflow-x: auto;
+        }
+
+        /* DEVELOPER FOOTER STYLE */
+        .footer-links {
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: #666;
+            text-align: center;
+        }
+        .footer-links a {
+            color: var(--main-color);
+            text-decoration: none;
+            font-weight: bold;
+            border: 1px solid rgba(0, 234, 255, 0.3);
+            padding: 5px 15px;
+            border-radius: 20px;
+            transition: 0.3s;
+        }
+        .footer-links a:hover {
+            background: var(--main-color);
+            color: #000;
+            box-shadow: 0 0 15px var(--main-color);
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="matrix"></canvas>
+
+<div class="main-container">
+    <div class="brand-header">
+        <h1>⚡ V-INTEL ⚡</h1>
+        <p>vehicle · free fire · IMEI (hidden api)</p>
+    </div>
+
+    <div class="card-modern">
+        <div class="card-title">🚘 VEHICLE INFO (RC)</div>
+        <div class="input-group">
+            <input type="text" id="rcInput" placeholder="UP32XY1234">
+            <button onclick="fetchVehicle()">🔍 SEARCH VEHICLE</button>
+        </div>
+        <div id="vehicleResult" class="result-block"></div>
+    </div>
+
+    <div class="card-modern">
+        <div class="card-title">🎮 FREE FIRE UID</div>
+        <div class="input-group">
+            <input type="text" id="ffUid" placeholder="FF UID e.g. 12345678">
+            <button onclick="fetchFF()">⚡ CHECK FF PROFILE</button>
+        </div>
+        <div id="ffResult" class="result-block"></div>
+    </div>
+
+    <div class="card-modern">
+        <div class="card-title">📱 IMEI CHECKER</div>
+        <div class="input-group">
+            <input type="text" id="imeiNum" placeholder="15 Digit IMEI">
+            <button class="btn-imei" onclick="showSimpleIMEI()">🔍 SIMPLE DETAILS</button>
+            <button class="btn-dev" onclick="openAllIMEI()">🌐 ALL DETAILS (NEW TAB)</button>
+        </div>
+        <div id="imeiSimpleResult" class="result-block"></div>
+    </div>
+
+    <div class="footer-links">
+        DEVELOPED BY: <a href="https://vshack999.github.io/Admin-vs-store-/Dev.html" target="_blank">VIKASH SAHU</a>
+    </div>
+</div>
+
+<script>
+    // --- MATRIX BACKGROUND ---
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth; 
+    canvas.height = window.innerHeight;
+    const drops = Array(Math.floor(canvas.width/16)).fill(1);
+    function drawMatrix() {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.1)"; 
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#00eaff";
+        drops.forEach((y, i) => {
+            ctx.fillText(String.fromCharCode(0x30A0 + Math.random() * 96), i * 16, y * 16);
+            if (y * 16 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+            drops[i]++;
+        });
+    }
+    setInterval(drawMatrix, 50);
+
+    // --- 🚘 VEHICLE API (HIDDEN) ---
+    async function fetchVehicle() {
+        const rc = document.getElementById('rcInput').value.trim().toUpperCase();
+        const resDiv = document.getElementById('vehicleResult');
+        if (!rc) return alert("❗ Please enter vehicle number");
+        resDiv.innerHTML = `<div style="color:#0ff; text-align:center;">⏳ scanning...</div>`;
+        try {
+            const response = await fetch(`/api-vehicle/${rc}`);
+            const data = await response.json();
+            if (data && data.basic_info) {
+                const b = data.basic_info;
+                resDiv.innerHTML = `
+                    <div class="json-box">${JSON.stringify(data, null, 2)}</div>
+                    <div class="vehicle-card">
+                        <div class="data-row"><span class="label">Owner:</span> <span class="val">${b.owner_name || 'N/A'}</span></div>
+                        <div class="data-row"><span class="label">Model:</span> <span class="val">${b.maker_model || 'N/A'}</span></div>
+                        <div class="data-row"><span class="label">Fuel:</span> <span class="val">${b.fuel_type || 'N/A'}</span></div>
+                    </div>`;
+            } else { resDiv.innerHTML = "❌ Vehicle Not Found"; }
+        } catch (e) { resDiv.innerHTML = "⚠️ API Error"; }
+    }
+
+    // --- 🎮 FREE FIRE API (HIDDEN) ---
+    async function fetchFF() {
+        const uid = document.getElementById('ffUid').value.trim();
+        const resDiv = document.getElementById('ffResult');
+        if(!uid) return alert("❗ Enter UID");
+        resDiv.innerHTML = "⏳ Loading Data...";
+        try {
+            const res = await fetch(`/api-ff/${uid}`);
+            const data = await res.json();
+            let html = "<div class='json-box'>";
+            for (let key in data) { html += `<b>${key.toUpperCase()}:</b> ${JSON.stringify(data[key])}<br>`; }
+            resDiv.innerHTML = html + "</div>";
+        } catch(e) { resDiv.innerHTML = "❌ FF Server Error"; }
+    }
+
+    // --- 📱 IMEI API (HIDDEN) ---
+    async function showSimpleIMEI() {
+        const imei = document.getElementById('imeiNum').value.trim();
+        const resDiv = document.getElementById('imeiSimpleResult');
+        if (!imei) return alert("❗ Enter IMEI");
+        resDiv.innerHTML = "⏳ Fetching...";
+        try {
+            const response = await fetch(`/api-imei/${imei}`);
+            const data = await response.json();
+            resDiv.innerHTML = `
+                <div class="vehicle-card" style="border-left-color: #2ed573;">
+                    <div class="data-row"><span class="label">Brand:</span> <span class="val">${data.brand || 'N/A'}</span></div>
+                    <div class="data-row"><span class="label">Model:</span> <span class="val">${data.model || 'N/A'}</span></div>
+                </div>`;
+        } catch (e) { resDiv.innerHTML = "❌ IMEI Scan Failed"; }
+    }
+
+    function openAllIMEI() {
+        const imei = document.getElementById('imeiNum').value.trim();
+        if(imei) window.open(`/api-imei/${imei}`, '_blank');
+        else alert('❗ Enter IMEI');
+    }
+</script>
+</body>
+</html>
